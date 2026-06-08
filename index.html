@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Treeai – Login & Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Reset ── */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Dark overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 0;
+        }
+
+        /* ── Card ── */
+        .treeai-container {
+            position: relative;
+            z-index: 1;
+            width: 880px;
+            max-width: 94vw;
+            min-height: 540px;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(14px) saturate(180%);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6);
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ── Left panel ── */
+        .form-panel {
+            width: 50%;
+            padding: 44px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+        .brand span { color: #4ade80; }
+
+        .brand-sub {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 28px;
+            font-weight: 300;
+        }
+
+        .form-box {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-box input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.25s, background 0.25s;
+        }
+        .form-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .form-box input:focus {
+            border-color: #4ade80;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .btn-primary {
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #0a1a0a;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 4px;
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(74, 222, 128, 0.35);
+        }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 0.9rem;
+            opacity: 0.75;
+        }
+        .toggle-link a {
+            color: #4ade80;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .toggle-link a:hover { text-decoration: underline; }
+
+        .form-box.hidden { display: none; }
+
+        /* ── Right panel (JS builds slides inside) ── */
+        .slider-panel {
+            width: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            perspective: 900px;
+        }
+
+        /* ── Google button placeholder ── */
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.25s;
+            margin-top: 4px;
+            min-height: 44px;
+        }
+        .google-btn:hover { background: rgba(255, 255, 255, 0.14); }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            margin: 6px 0;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 720px) {
+            .treeai-container {
+                flex-direction: column;
+                width: 94vw;
+                min-height: auto;
+            }
+            .form-panel,
+            .slider-panel {
+                width: 100%;
+            }
+            .slider-panel {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="treeai-container">
+
+        <!-- LEFT – FORMS -->
+        <div class="form-panel">
+            <div class="brand">🌿 Tree<span>ai</span></div>
+            <div class="brand-sub">Grow your digital forest</div>
+
+            <!-- LOGIN -->
+            <div id="loginForm" class="form-box">
+                <input type="email" id="loginEmail" placeholder="Email address" />
+                <input type="password" id="loginPassword" placeholder="Password" />
+                <button class="btn-primary" onclick="handleLogin()">Sign In</button>
+                <div class="divider">or</div>
+                <div class="google-btn" id="googleSignInBtn">Continue with Google</div>
+                <div class="toggle-link">
+                    Don't have an account? <a onclick="showRegister()">Create one</a>
+                </div>
+            </div>
+
+            <!-- REGISTER -->
+            <div id="registerForm" class="form-box hidden">
+                <input type="text" id="regName" placeholder="Full name" />
+                <input type="email" id="regEmail" placeholder="Email address" />
+                <input type="password" id="regPassword" placeholder="Password" />
+                <input type="password" id="regConfirm" placeholder="Confirm password" />
+                <button class="btn-primary" onclick="handleRegister()">Create Account</button>
+                <div class="divider">or</div>
+                <div class="google-btn" id="googleSignUpBtn">Sign up with Google</div>
+                <div class="toggle-link">
+                    Already registered? <a onclick="showLogin()">Sign in</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT – 3D SLIDER (JS builds everything inside) -->
+        <div class="slider-panel" id="sliderPanel"></div>
+
+    </div>
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        // ═════════════════════════════════════════════════════════════════════
+        // 1.  CONFIGURATION
+        // ═════════════════════════════════════════════════════════════════════
+
+        const CONFIG = {
+            // Background photo (your ImgBB link)
+            background: 'https://i.ibb.co/ymm72Zwm/Untitled-design-2.png',
+
+            // Google OAuth Client ID
+            clientId: '263963198101-j22cbgt5bqtuoejb3hjiird9cogqbij5.apps.googleusercontent.com',
+
+            // 3D Slider images (8 nature/tech)
+            slides: [
+                'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80',
+                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&q=80',
+                'https://images.unsplash.com/photo-1518173946687-a36f968f7c8f?w=300&q=80',
+                'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=300&q=80',
+                'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=300&q=80',
+                'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&q=80',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=300&q=80',
+                'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&q=80',
+            ],
+
+            slider: {
+                radius: 200,
+                speed: 18,       // seconds per full rotation
+                slideWidth: 150,
+                slideRatio: 16 / 10,
+            },
+        };
+
+        // ═════════════════════════════════════════════════════════════════════
+        // 2.  BACKGROUND
+        // ═════════════════════════════════════════════════════════════════════
+
+        function setBackground(url) {
+            document.body.style.background = `url('${url}') center/cover no-repeat fixed`;
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        // 3.  3D SLIDER – BUILD & ANIMATE (all in JS)
+        // ═════════════════════════════════════════════════════════════════════
+
+        let animationId = null;
+        let rotation = 0;
+        let isPlaying = true;
+
+        function buildSlider(container, images, cfg) {
+            const track = document.createElement('div');
+            track.className = 'slider-track';
+            track.style.cssText = `
+                position: relative; width: 100%; height: 100%;
+                display: flex; align-items: center; justify-content: center;
+                transform-style: preserve-3d;
+            `;
+
+            const count = images.length;
+            const angleStep = 360 / count;
+
+            images.forEach((url, i) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                const angle = angleStep * i;
+                slide.style.cssText = `
+                    position: absolute;
+                    width: ${cfg.slideWidth}px;
+                    aspect-ratio: ${cfg.slideRatio};
+                    border-radius: 14px;
+                    background: url('${url}') center/cover no-repeat;
+                    box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+                    border: 2px solid rgba(255,255,255,0.15);
+                    backface-visibility: hidden;
+                    opacity: 0.9;
+                    transform: rotateY(${angle}deg) translateZ(${cfg.radius}px);
+                    transition: opacity 0.4s;
+                `;
+                slide.addEventListener('mouseenter', () => { slide.style.opacity = '1'; });
+                slide.addEventListener('mouseleave', () => { slide.style.opacity = '0.9'; });
+                track.appendChild(slide);
+            });
+
+            container.appendChild(track);
+            return track;
+        }
+
+        function startSlider(track, speed) {
+            const step = 360 / (speed * 60);
+
+            function frame() {
+                if (isPlaying) {
+                    rotation = (rotation + step) % 360;
+                    track.style.transform = `rotateY(${rotation}deg)`;
+                }
+                animationId = requestAnimationFrame(frame);
+            }
+            animationId = requestAnimationFrame(frame);
+        }
+
+        function stopSlider() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        function initSlider() {
+            const panel = document.getElementById('sliderPanel');
+            panel.innerHTML = '';
+
+            const track = buildSlider(panel, CONFIG.slides, CONFIG.slider);
+            startSlider(track, CONFIG.slider.speed);
+
+            // Pause on hover
+            panel.addEventListener('mouseenter', () => { isPlaying = false; });
+            panel.addEventListener('mouseleave', () => { isPlaying = true; });
+
+            // Responsive radius on small screens
+            const ro = new ResizeObserver(() => {
+                const w = window.innerWidth;
+                const newRadius = w < 720 ? 140 : CONFIG.slider.radius;
+                const slides = track.querySelectorAll('.slide');
+                const count = slides.length;
+                const angleStep = 360 / count;
+                slides.forEach((slide, i) => {
+                    const angle = angleStep * i;
+                    slide.style.transform = `rotateY(${angle}deg) translateZ(${newRadius}px)`;
+                });
+            });
+            ro.observe(document.body);
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        // 4.  FORM LOGIC
+        // ═════════════════════════════════════════════════════════════════════
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass  = document.getElementById('loginPassword').value;
+            if (!email || !pass) {
+                alert('Please fill in both email and password.');
+                return;
+            }
+            console.log('[Login]', { email });
+            alert(`Welcome back, ${email}!`);
+        }
+
+        function handleRegister() {
+            const name    = document.getElementById('regName').value.trim();
+            const email   = document.getElementById('regEmail').value.trim();
+            const pass    = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+
+            if (!name || !email || !pass || !confirm) {
+                alert('All fields are required.');
+                return;
+            }
+            if (pass !== confirm) {
+                alert('Passwords do not match.');
+                return;
+            }
+            console.log('[Register]', { name, email });
+            alert(`Account created for ${name}! You can now sign in.`);
+            showLogin();
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        // 5.  GOOGLE SIGN-IN (Client ID in JS)
+        // ═════════════════════════════════════════════════════════════════════
+
+        function handleGoogleCredential(response) {
+            console.log('[Google JWT]', response.credential);
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            console.log('[Google User]', payload);
+            alert(`Signed in as ${payload.name} (${payload.email})`);
+        }
+
+        function initGoogleAuth() {
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.warn('Google Identity Services not loaded — retrying...');
+                setTimeout(initGoogleAuth, 1000);
+                return;
+            }
+
+            google.accounts.id.initialize({
+                client_id: CONFIG.clientId,
+                callback: handleGoogleCredential,
+            });
+
+            google.accounts.id.renderButton(
+                document.getElementById('googleSignInBtn'),
+                { theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill' }
+            );
+
+            google.accounts.id.renderButton(
+                document.getElementById('googleSignUpBtn'),
+                { theme: 'outline', size: 'large', text: 'signup_with', shape: 'pill' }
+            );
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        // 6.  BOOT
+        // ═════════════════════════════════════════════════════════════════════
+
+        window.addEventListener('load', () => {
+            setBackground(CONFIG.background);
+            initSlider();
+            initGoogleAuth();
+        });
+
+        window.addEventListener('beforeunload', stopSlider);
+    </script>
+
+</body>
+</html>
