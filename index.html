@@ -246,11 +246,11 @@
         // ═════════════════════════════════════════════════════════════════════
 
         const CONFIG = {
-            // Background photo (your ImgBB link)
-            background: 'https://i.ibb.co/ymm72Zwm/Untitled-design-2.png',
+            // 4K 3D background photo – high resolution nature scene
+            background: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&q=80',
 
-            // Google OAuth Client ID
-            clientId: '263963198101-j22cbgt5bqtuoejb3hjiird9cogqbij5.apps.googleusercontent.com',
+            // Google OAuth Client ID (updated)
+            clientId: '950088039383-i7buq07iqd6b3k8vqofefbhk4kl71bjm.apps.googleusercontent.com',
 
             // 3D Slider images (8 nature/tech)
             slides: [
@@ -266,7 +266,7 @@
 
             slider: {
                 radius: 200,
-                speed: 18,       // seconds per full rotation
+                speed: 18,
                 slideWidth: 150,
                 slideRatio: 16 / 10,
             },
@@ -281,7 +281,7 @@
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // 3.  3D SLIDER – BUILD & ANIMATE (all in JS)
+        // 3.  3D SLIDER – BUILD & ANIMATE
         // ═════════════════════════════════════════════════════════════════════
 
         let animationId = null;
@@ -417,7 +417,7 @@
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // 5.  GOOGLE SIGN-IN (Client ID in JS)
+        // 5.  GOOGLE SIGN-IN (Client ID updated)
         // ═════════════════════════════════════════════════════════════════════
 
         function handleGoogleCredential(response) {
