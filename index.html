@@ -21,6 +21,25 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
+        }
+
+        /* ── Animated background container ── */
+        .bg-layer {
+            position: fixed;
+            inset: -10%;
+            z-index: -1;
+            background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&q=80') center/cover no-repeat;
+            animation: bgZoomOut 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgZoomOut {
+            0% {
+                transform: scale(1.15);
+            }
+            100% {
+                transform: scale(1.0);
+            }
         }
 
         /* Dark overlay */
@@ -198,6 +217,9 @@
 </head>
 <body>
 
+    <!-- Animated 4K background layer -->
+    <div class="bg-layer"></div>
+
     <div class="treeai-container">
 
         <!-- LEFT – FORMS -->
@@ -246,11 +268,8 @@
         // ═════════════════════════════════════════════════════════════════════
 
         const CONFIG = {
-            // 4K 3D background photo – high resolution nature scene
-            background: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&q=80',
-
             // Google OAuth Client ID (updated)
-            clientId: '950088039383-i7buq07iqd6b3k8vqofefbhk4kl71bjm.apps.googleusercontent.com',
+            clientId: '950088039383-mmqhsih4plh3p5n56q885laetu1frnd5.apps.googleusercontent.com',
 
             // 3D Slider images (8 nature/tech)
             slides: [
@@ -273,15 +292,7 @@
         };
 
         // ═════════════════════════════════════════════════════════════════════
-        // 2.  BACKGROUND
-        // ═════════════════════════════════════════════════════════════════════
-
-        function setBackground(url) {
-            document.body.style.background = `url('${url}') center/cover no-repeat fixed`;
-        }
-
-        // ═════════════════════════════════════════════════════════════════════
-        // 3.  3D SLIDER – BUILD & ANIMATE
+        // 2.  3D SLIDER – BUILD & ANIMATE (with photo float animation)
         // ═════════════════════════════════════════════════════════════════════
 
         let animationId = null;
@@ -304,6 +315,12 @@
                 const slide = document.createElement('div');
                 slide.className = 'slide';
                 const angle = angleStep * i;
+
+                // Random float offset for organic feel
+                const floatY = (Math.random() * 20 - 10).toFixed(1);
+                const floatDuration = (12 + Math.random() * 8).toFixed(1);
+                const floatDelay = (Math.random() * 4).toFixed(1);
+
                 slide.style.cssText = `
                     position: absolute;
                     width: ${cfg.slideWidth}px;
@@ -315,10 +332,32 @@
                     backface-visibility: hidden;
                     opacity: 0.9;
                     transform: rotateY(${angle}deg) translateZ(${cfg.radius}px);
-                    transition: opacity 0.4s;
+                    animation: slideFloat${i} ${floatDuration}s ease-in-out ${floatDelay}s infinite alternate;
+                    transition: opacity 0.4s, box-shadow 0.4s;
                 `;
-                slide.addEventListener('mouseenter', () => { slide.style.opacity = '1'; });
-                slide.addEventListener('mouseleave', () => { slide.style.opacity = '0.9'; });
+
+                // Inject unique keyframe for each slide
+                const styleSheet = document.createElement('style');
+                styleSheet.textContent = `
+                    @keyframes slideFloat${i} {
+                        0% { transform: rotateY(${angle}deg) translateZ(${cfg.radius}px) translateY(${floatY}px); }
+                        100% { transform: rotateY(${angle}deg) translateZ(${cfg.radius}px) translateY(${-floatY}px); }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+
+                // Hover glow effect
+                slide.addEventListener('mouseenter', () => {
+                    slide.style.opacity = '1';
+                    slide.style.boxShadow = '0 0 30px 8px rgba(74, 222, 128, 0.3)';
+                    slide.style.borderColor = 'rgba(74, 222, 128, 0.5)';
+                });
+                slide.addEventListener('mouseleave', () => {
+                    slide.style.opacity = '0.9';
+                    slide.style.boxShadow = '0 12px 30px rgba(0,0,0,0.6)';
+                    slide.style.borderColor = 'rgba(255,255,255,0.15)';
+                });
+
                 track.appendChild(slide);
             });
 
@@ -353,7 +392,7 @@
             const track = buildSlider(panel, CONFIG.slides, CONFIG.slider);
             startSlider(track, CONFIG.slider.speed);
 
-            // Pause on hover
+            // Pause on hover over the panel
             panel.addEventListener('mouseenter', () => { isPlaying = false; });
             panel.addEventListener('mouseleave', () => { isPlaying = true; });
 
@@ -361,19 +400,19 @@
             const ro = new ResizeObserver(() => {
                 const w = window.innerWidth;
                 const newRadius = w < 720 ? 140 : CONFIG.slider.radius;
-                const slides = track.querySelectorAll('.slide');
-                const count = slides.length;
-                const angleStep = 360 / count;
-                slides.forEach((slide, i) => {
-                    const angle = angleStep * i;
-                    slide.style.transform = `rotateY(${angle}deg) translateZ(${newRadius}px)`;
-                });
+                // Rebuild slider for new radius (keyframes need updating)
+                // Simpler approach: just remove and rebuild
+                panel.innerHTML = '';
+                const newTrack = buildSlider(panel, CONFIG.slides, {...CONFIG.slider, radius: newRadius});
+                startSlider(newTrack, CONFIG.slider.speed);
+                panel.addEventListener('mouseenter', () => { isPlaying = false; });
+                panel.addEventListener('mouseleave', () => { isPlaying = true; });
             });
             ro.observe(document.body);
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // 4.  FORM LOGIC
+        // 3.  FORM LOGIC
         // ═════════════════════════════════════════════════════════════════════
 
         function showRegister() {
@@ -417,7 +456,7 @@
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // 5.  GOOGLE SIGN-IN (Client ID updated)
+        // 4.  GOOGLE SIGN-IN (Client ID updated)
         // ═════════════════════════════════════════════════════════════════════
 
         function handleGoogleCredential(response) {
@@ -451,11 +490,10 @@
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // 6.  BOOT
+        // 5.  BOOT
         // ═════════════════════════════════════════════════════════════════════
 
         window.addEventListener('load', () => {
-            setBackground(CONFIG.background);
             initSlider();
             initGoogleAuth();
         });
